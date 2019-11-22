@@ -366,10 +366,37 @@ class TestUpdateSshConfig(test_helpers.CiTestCase):
         m_write_file.assert_not_called()
 
 
+class TestBasicAuthorizedKeyParse(test_helpers.CiTestCase):
+    def test_user(self):
+        self.assertEqual(
+            ["/opt/bobby/keys"],
+            ssh_util.render_authorizedkeysfile_paths(
+                "/opt/%u/keys", "/home/bobby", "bobby"))
+
+    def test_multiple(self):
+        self.assertEqual(
+            ["/keys/path1", "/keys/path2"],
+            ssh_util.render_authorizedkeysfile_paths(
+                "/keys/path1 /keys/path2", "/home/bobby", "bobby"))
+
+    def test_relative(self):
+        self.assertEqual(
+            ["/home/bobby/.secret/keys"],
+            ssh_util.render_authorizedkeysfile_paths(
+                ".secret/keys", "/home/bobby", "bobby"))
+
+    def test_home(self):
+        self.assertEqual(
+            ["/homedirs/bobby/.keys"],
+            ssh_util.render_authorizedkeysfile_paths(
+                "%h/.keys", "/homedirs/bobby", "bobby"))
+
+
+
 class TestMultipleSshAuthorizedKeysFile(test_helpers.CiTestCase):
     username = 'foouser'
     dist = MyBaseDistro()
-    dist.create_user(username)
+    #dist.create_user(username)
     key_entries = []
 
     def test_multiple_authorizedkeys_file_order1(self):
