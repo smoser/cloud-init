@@ -173,7 +173,6 @@ def parse_authorized_keys(fnames):
                     contents.append(parser.parse(line))
         except (IOError, OSError):
             util.logexc(LOG, "Error reading lines from %s", fname)
-            lines = []
 
     return contents
 
@@ -235,6 +234,7 @@ def render_authorizedkeysfile_paths(value, homedir, username):
 
 def extract_authorized_keys(username, sshd_cfg_file=DEF_SSHD_CFG):
     (ssh_dir, pw_ent) = users_ssh_info(username)
+    default_authorizedkeys_file = os.path.join(ssh_dir, 'authorized_keys')
     auth_key_fns = []
     with util.SeLinuxGuard(ssh_dir, recursive=True):
         try:
@@ -245,7 +245,7 @@ def extract_authorized_keys(username, sshd_cfg_file=DEF_SSHD_CFG):
 
         except (IOError, OSError):
             # Give up and use a default key filename
-            auth_key_fns[0] = os.path.join(ssh_dir, 'authorized_keys')
+            auth_key_fns[0] = default_authorizedkeys_file
             util.logexc(LOG, "Failed extracting 'AuthorizedKeysFile' in ssh "
                         "config from %r, using 'AuthorizedKeysFile' file "
                         "%r instead", DEF_SSHD_CFG, auth_key_fns[0])
